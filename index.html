@@ -49,10 +49,11 @@
   }
 
   function setup() {
-    createCanvas(windowWidth, windowHeight);
+    createCanvas(windowWidth, windowHeight); // Back to 2D renderer for text compatibility
     amplitude = new p5.Amplitude();
     textAlign(CENTER, CENTER);
     rectMode(CENTER);
+    frameRate(30); // Cap FPS to 30 for mobile performance
     
     // LOWER VOLUME HERE (0.0 to 1.0)
     song.setVolume(0.2); 
@@ -74,39 +75,39 @@
 
 function draw() {
     // Draw video as background (replaces solid background)
-    image(bgVideo, 0, 0, width, height);
+    image(bgVideo, 0, 0, width, height); // Back to 2D coordinates
 
     let level = amplitude.getLevel();
-    let speed = 2;
+    let speed = 1.5; // Slightly reduced speed for less load
     let unitWidth = textWidth(displayText) + spacing;
     let copies = width / unitWidth + 2; 
-    let rowHeight = 45;
+    let rowHeight = 50; // Increased slightly to reduce rows
     // 1. BACKGROUND (Scrolling Rows) - now overlaid on video with increased opacity
-    textSize(40);
+    textSize(35); // Slightly smaller for performance
     textStyle(BOLDITALIC); // Make text bold and italic
-    for (let i = 0; i < (height / rowHeight + 2); i++) {
-      let y = i * rowHeight;
+    for (let i = 0; i < (height / rowHeight + 1); i++) { // Reduced rows
+      let y = i * rowHeight; // Back to 2D coordinates
       let direction = (i % 2 === 0) ? 1 : -1; 
       let currentOffset = (frameCount * speed * direction) % unitWidth;
       if (direction === -1 && currentOffset > 0) currentOffset -= unitWidth;
 
-      fill(255, 255, 255, 100); // White fill with same opacity for visibility
+      fill(255, 255, 255, 120); // Slightly higher opacity, white
       for (let j = -1; j < copies; j++) {
-        text(displayText, (j * unitWidth) + currentOffset, y);
+        text(displayText, (j * unitWidth) + currentOffset, y); // Back to 2D coordinates
       }
     }
     // 2. CENTER TEXT WITH PULSATING GLOW
     push(); // Start a new drawing state
-    translate(width / 2, height / 2);
+    translate(width / 2, height / 2); // Back to 2D center
     
-    // Subtle scaling for pulsation
-    let scaleFactor = map(level, 0, 0.3, 1, 1.2);
+    // More pronounced scaling for pulsation on beats
+    let scaleFactor = map(level, 0, 0.3, 1, 1.5);
     scale(scaleFactor);
     
-    textSize(80);
+    textSize(70); // Slightly smaller for performance
     
-    // Calculate stronger Glow Intensity based on music
-    let glowSize = map(level, 0, 0.3, 80, 400); // Increased range for stronger glow
+    // Calculate glow (reduced range for less load)
+    let glowSize = map(level, 0, 0.3, 50, 200);
     
     // Set the Glow properties to gold
     drawingContext.shadowBlur = glowSize;
@@ -115,12 +116,10 @@ function draw() {
     // Draw the main text with gold fill and darker gold stroke for metallic look
     fill(255, 215, 0); // Gold fill
     stroke(218, 165, 32); // Darker gold stroke for contrast
-    strokeWeight(5); // Increased for bolder text
+    strokeWeight(3); // Reduced for performance
     text(displayText, 0, 0);
     
-    // Extra glow layer for stronger effect
-    drawingContext.shadowBlur = glowSize / 1.5;
-    text(displayText, 0, 0);
+    // Removed extra glow layer to reduce load
     
     pop(); // Restore drawing state
   }
