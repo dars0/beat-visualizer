@@ -11,25 +11,41 @@
     #overlay {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
-      color: white; font-family: sans-serif; font-size: 24px;
-      background: rgba(0,0,0,0.8); cursor: pointer; z-index: 10;
+      color: white; font-family: sans-serif; font-size: 48px;
+      background: rgba(0,0,0,1); cursor: pointer; z-index: 10;
     }
+    .shadow-dance-text {
+    text-align: center;
+    font-size: 4rem; 
+    color: #fff;
+    text-shadow: 5px 5px 0 #ff005e, 10px 10px 0 #00d4ff;
+    animation: shadow-dance 2s infinite;
+}
+
+    @keyframes shadow-dance {
+    0%, 100% {
+        text-shadow: 5px 5px 0 #ff005e, 10px 10px 0 #00d4ff;
+    }
+    50% {
+        text-shadow: -5px -5px 0 #00d4ff, -10px -10px 0 #ff005e;
+    }
+}
   </style>
 </head>
 <body>
 
-<div id="overlay">Happy Birthday GIIIRL</div>
+<div id="overlay" class="shadow-dance-text">HAPPY BIRTHDAY NIAAA</br></br>CLICK ME!!!!! :P<vvvvvvvvvvvvvv/div>
 
 <script>
-  let myFont;
   let song;
   let amplitude;
   let displayText = "NIA MAGARIA"; 
   let spacing = 30; // Space between repeated text
+  let bgVideo; // New variable for background video
   
   function preload() {
     song = loadSound('mysong.mp3');
-    myFont = loadFont('OstrichSansInline-Italic.ttf'); 
+    bgVideo = createVideo('background.mp4'); // Load your video file here
   }
 
   function setup() {
@@ -41,59 +57,69 @@
     // LOWER VOLUME HERE (0.0 to 1.0)
     song.setVolume(0.2); 
 
+    // Setup background video
+    bgVideo.hide(); // Hide the DOM video element
+    bgVideo.loop(); // Loop the video
+    bgVideo.volume(0); // Mute video audio (optional, adjust if needed)
+
     let overlay = document.getElementById('overlay');
     overlay.addEventListener('click', () => {
       if (!song.isPlaying()) {
         song.play();
+        bgVideo.play(); // Explicitly start the video on click
         overlay.style.display = 'none';
       }
     });
   }
 
 function draw() {
-    textFont(myFont);
-    background(10, 10, 15); 
+    // Draw video as background (replaces solid background)
+    image(bgVideo, 0, 0, width, height);
 
     let level = amplitude.getLevel();
     let speed = 2;
     let unitWidth = textWidth(displayText) + spacing;
     let copies = width / unitWidth + 2; 
-    let rowHeight = 60;
-    // 1. BACKGROUND (Scrolling Rows)
+    let rowHeight = 45;
+    // 1. BACKGROUND (Scrolling Rows) - now overlaid on video with increased opacity
     textSize(40);
+    textStyle(BOLDITALIC); // Make text bold and italic
     for (let i = 0; i < (height / rowHeight + 2); i++) {
       let y = i * rowHeight;
       let direction = (i % 2 === 0) ? 1 : -1; 
       let currentOffset = (frameCount * speed * direction) % unitWidth;
       if (direction === -1 && currentOffset > 0) currentOffset -= unitWidth;
 
-      fill(255, 255, 255, 30); 
+      fill(255, 255, 255, 100); // White fill with same opacity for visibility
       for (let j = -1; j < copies; j++) {
         text(displayText, (j * unitWidth) + currentOffset, y);
       }
     }
-
     // 2. CENTER TEXT WITH PULSATING GLOW
     push(); // Start a new drawing state
     translate(width / 2, height / 2);
+    
+    // Subtle scaling for pulsation
+    let scaleFactor = map(level, 0, 0.3, 1, 1.2);
+    scale(scaleFactor);
+    
     textSize(80);
     
-    // Calculate Glow Intensity based on music
-    // 10 is the minimum glow, 150 is the max glow on big beats
-    let glowSize = map(level, 0, 0.3, 40, 250); 
+    // Calculate stronger Glow Intensity based on music
+    let glowSize = map(level, 0, 0.3, 80, 400); // Increased range for stronger glow
     
-    // Set the Glow properties
+    // Set the Glow properties to gold
     drawingContext.shadowBlur = glowSize;
-    drawingContext.shadowColor = color(0, 255, 200); // Neon Cyan
+    drawingContext.shadowColor = color(255, 215, 0); // Gold glow
     
-    // Draw the main text (it stays the same size now!)
-    fill(255); 
-    stroke(0, 255, 200);
-    strokeWeight(2);
+    // Draw the main text with gold fill and darker gold stroke for metallic look
+    fill(255, 215, 0); // Gold fill
+    stroke(218, 165, 32); // Darker gold stroke for contrast
+    strokeWeight(5); // Increased for bolder text
     text(displayText, 0, 0);
     
-    // Optional: Layer a second "heavy" glow for extra brightness
-    drawingContext.shadowBlur = glowSize / 2;
+    // Extra glow layer for stronger effect
+    drawingContext.shadowBlur = glowSize / 1.5;
     text(displayText, 0, 0);
     
     pop(); // Restore drawing state
