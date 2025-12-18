@@ -56,7 +56,7 @@
     frameRate(30); // Cap FPS to 30 for mobile performance
     
     // LOWER VOLUME HERE (0.0 to 1.0)
-    song.setVolume(0.2); 
+    song.setVolume(0.15); 
 
     // Setup background video
     bgVideo.hide(); // Hide the DOM video element
@@ -99,6 +99,12 @@ function draw() {
     // 2. CENTER TEXT WITH PULSATING GLOW
     push(); // Start a new drawing state
     translate(width / 2, height / 2); // Back to 2D center
+    
+    // Add oscillating movement for "moving around" effect, scaled by beat level
+    let moveRadius = 30 * level; // Movement radius increases with beat intensity
+    let offsetX = sin(frameCount * 1) * moveRadius;
+    let offsetY = cos(frameCount * 1) * moveRadius;
+    translate(offsetX, offsetY);
     
     // More pronounced scaling for pulsation on beats
     let scaleFactor = map(level, 0, 0.3, 1, 1.5);
