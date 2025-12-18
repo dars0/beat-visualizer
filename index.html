@@ -18,16 +18,18 @@
 </head>
 <body>
 
-<div id="overlay">Click to Start the Vibe</div>
+<div id="overlay">Happy Birthday GIIIRL</div>
 
 <script>
+  let myFont;
   let song;
   let amplitude;
   let displayText = "NIA MAGARIA"; 
   let spacing = 30; // Space between repeated text
   
   function preload() {
-    song = loadSound('mysong.mp3'); 
+    song = loadSound('mysong.mp3');
+    myFont = loadFont('OstrichSansInline-Italic.ttf'); 
   }
 
   function setup() {
@@ -37,7 +39,7 @@
     rectMode(CENTER);
     
     // LOWER VOLUME HERE (0.0 to 1.0)
-    song.setVolume(0.3); 
+    song.setVolume(0.2); 
 
     let overlay = document.getElementById('overlay');
     overlay.addEventListener('click', () => {
@@ -48,72 +50,53 @@
     });
   }
 
-  function draw() {
-    background(10, 10, 15); // Very dark blue/black
+function draw() {
+    textFont(myFont);
+    background(10, 10, 15); 
 
     let level = amplitude.getLevel();
     let speed = 2;
-    
-    // 1. BACKGROUND (Seamless Infinite Scroll)
-    textSize(40);
-    noStroke();
-    
-    // Calculate how wide one "unit" of text is
     let unitWidth = textWidth(displayText) + spacing;
-    
-    // How many copies do we need to cover the screen?
     let copies = width / unitWidth + 2; 
-
     let rowHeight = 60;
-    let totalRows = height / rowHeight + 2;
-
-    for (let i = 0; i < totalRows; i++) {
+    // 1. BACKGROUND (Scrolling Rows)
+    textSize(40);
+    for (let i = 0; i < (height / rowHeight + 2); i++) {
       let y = i * rowHeight;
-      
-      // Alternate direction
       let direction = (i % 2 === 0) ? 1 : -1; 
-      
-      // Calculate seamless offset
-      // This math ensures it wraps perfectly based on text width, not screen width
       let currentOffset = (frameCount * speed * direction) % unitWidth;
-      
-      // If moving left (negative), we need to shift starting position so it doesn't snap
       if (direction === -1 && currentOffset > 0) currentOffset -= unitWidth;
 
-      // Glow effect for background (subtle)
-      drawingContext.shadowBlur = 10;
-      drawingContext.shadowColor = color(255, 255, 255, 50);
       fill(255, 255, 255, 30); 
-
-      // Draw the row of text
       for (let j = -1; j < copies; j++) {
-        let x = (j * unitWidth) + currentOffset;
-        text(displayText, x, y);
+        text(displayText, (j * unitWidth) + currentOffset, y);
       }
     }
 
-    // 2. CENTER PULSATING TEXT (With Neon Glow)
-    let scaleFactor = map(level, 0, 0.3, 1, 3.5); 
-    scaleFactor = constrain(scaleFactor, 1, 4);
-
+    // 2. CENTER TEXT WITH PULSATING GLOW
+    push(); // Start a new drawing state
     translate(width / 2, height / 2);
-    scale(scaleFactor);
+    textSize(80);
     
-    // Strong Neon Glow
-    // Map the blur strength to the music volume
-    let glowStrength = map(level, 0, 0.3, 20, 100);
-    drawingContext.shadowBlur = glowStrength;
-    drawingContext.shadowColor = color(0, 255, 200); // Neon Cyan Color
-
-    // Text style
+    // Calculate Glow Intensity based on music
+    // 10 is the minimum glow, 150 is the max glow on big beats
+    let glowSize = map(level, 0, 0.3, 40, 250); 
+    
+    // Set the Glow properties
+    drawingContext.shadowBlur = glowSize;
+    drawingContext.shadowColor = color(0, 255, 200); // Neon Cyan
+    
+    // Draw the main text (it stays the same size now!)
     fill(255); 
     stroke(0, 255, 200);
     strokeWeight(2);
-    textSize(80);
     text(displayText, 0, 0);
     
-    // Reset glow so it doesn't mess up other things in next frame
-    drawingContext.shadowBlur = 0; 
+    // Optional: Layer a second "heavy" glow for extra brightness
+    drawingContext.shadowBlur = glowSize / 2;
+    text(displayText, 0, 0);
+    
+    pop(); // Restore drawing state
   }
 
   function windowResized() {
