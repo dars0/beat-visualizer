@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Music Visualizer</title>
+  <title>Neon Pulse Visualizer</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
   <style>
-    body { margin: 0; padding: 0; overflow: hidden; background: #000; }
+    body { margin: 0; padding: 0; overflow: hidden; background: #050505; }
     canvas { display: block; }
     #overlay {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -18,17 +18,15 @@
 </head>
 <body>
 
-<div id="overlay">Click anywhere to start music</div>
+<div id="overlay">Click to Start the Vibe</div>
 
 <script>
   let song;
   let amplitude;
-  let displayText = "NIA MAGARIA"; // CHANGE THIS TEXT
-  let font;
+  let displayText = "DROP THE BEAT"; 
+  let spacing = 30; // Space between repeated text
   
-  // Load your song here. Ensure the file is in the same folder as this index.html
   function preload() {
-    // Replace 'mysong.mp3' with your actual music file name
     song = loadSound('mysong.mp3'); 
   }
 
@@ -38,7 +36,9 @@
     textAlign(CENTER, CENTER);
     rectMode(CENTER);
     
-    // Hide overlay and play music on click
+    // LOWER VOLUME HERE (0.0 to 1.0)
+    song.setVolume(0.3); 
+
     let overlay = document.getElementById('overlay');
     overlay.addEventListener('click', () => {
       if (!song.isPlaying()) {
@@ -49,52 +49,71 @@
   }
 
   function draw() {
-    background(20); // Dark grey background
+    background(10, 10, 15); // Very dark blue/black
 
-    let level = amplitude.getLevel(); // Get volume (0.0 to 1.0)
+    let level = amplitude.getLevel();
+    let speed = 2;
     
-    // 1. DRAW BACKGROUND (Scrolling Rows)
+    // 1. BACKGROUND (Seamless Infinite Scroll)
     textSize(40);
-    fill(255, 255, 255, 50); // White with low opacity (transparency)
     noStroke();
     
-    let speed = 2;
+    // Calculate how wide one "unit" of text is
+    let unitWidth = textWidth(displayText) + spacing;
+    
+    // How many copies do we need to cover the screen?
+    let copies = width / unitWidth + 2; 
+
     let rowHeight = 60;
     let totalRows = height / rowHeight + 2;
-    
+
     for (let i = 0; i < totalRows; i++) {
       let y = i * rowHeight;
-      // Alternate direction: Even rows go right, Odd rows go left
+      
+      // Alternate direction
       let direction = (i % 2 === 0) ? 1 : -1; 
       
-      // Calculate movement based on frameCount
-      let xOffset = (frameCount * speed * direction) % width;
+      // Calculate seamless offset
+      // This math ensures it wraps perfectly based on text width, not screen width
+      let currentOffset = (frameCount * speed * direction) % unitWidth;
       
-      // Draw text multiple times to fill the row width
-      let textW = textWidth(displayText + "   ");
-      let repeats = width / textW + 4; // Add extra to cover edges
-      
-      for (let j = -2; j < repeats; j++) {
-        let x = j * textW + xOffset;
+      // If moving left (negative), we need to shift starting position so it doesn't snap
+      if (direction === -1 && currentOffset > 0) currentOffset -= unitWidth;
+
+      // Glow effect for background (subtle)
+      drawingContext.shadowBlur = 10;
+      drawingContext.shadowColor = color(255, 255, 255, 50);
+      fill(255, 255, 255, 30); 
+
+      // Draw the row of text
+      for (let j = -1; j < copies; j++) {
+        let x = (j * unitWidth) + currentOffset;
         text(displayText, x, y);
       }
     }
 
-    // 2. DRAW CENTER PULSATING TEXT
-    // Map volume level (usually 0.0 to 0.3) to a size scale
-    let scaleFactor = map(level, 0, 0.3, 1, 2.5); 
-    // Constrain it so it doesn't get too crazy
-    scaleFactor = constrain(scaleFactor, 1, 3);
+    // 2. CENTER PULSATING TEXT (With Neon Glow)
+    let scaleFactor = map(level, 0, 0.3, 1, 3.5); 
+    scaleFactor = constrain(scaleFactor, 1, 4);
 
-    translate(width / 2, height / 2); // Move to center
-    scale(scaleFactor); // Apply the pulse size
+    translate(width / 2, height / 2);
+    scale(scaleFactor);
     
-    // Cool neon styling
-    stroke(255, 0, 100);
-    strokeWeight(4);
-    fill(255);
+    // Strong Neon Glow
+    // Map the blur strength to the music volume
+    let glowStrength = map(level, 0, 0.3, 20, 100);
+    drawingContext.shadowBlur = glowStrength;
+    drawingContext.shadowColor = color(0, 255, 200); // Neon Cyan Color
+
+    // Text style
+    fill(255); 
+    stroke(0, 255, 200);
+    strokeWeight(2);
     textSize(80);
     text(displayText, 0, 0);
+    
+    // Reset glow so it doesn't mess up other things in next frame
+    drawingContext.shadowBlur = 0; 
   }
 
   function windowResized() {
@@ -103,5 +122,4 @@
 </script>
 
 </body>
-
 </html>
